@@ -1,5 +1,5 @@
  // глобальная переменная для контекста WebGL
- function createShader(gl, type, source) {
+ const createShader = (gl, type, source) => {
     var shader = gl.createShader(type);   // создание шейдера
     gl.shaderSource(shader, source);      // устанавливаем шейдеру его программный код
     gl.compileShader(shader);             // компилируем шейдер
@@ -11,7 +11,7 @@
     console.log(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
 }
-function createProgram(gl, vertexShader, fragmentShader) {
+const createProgram = (gl, vertexShader, fragmentShader) => {
     var program = gl.createProgram();
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
@@ -64,16 +64,17 @@ const identity = () => {
     ];
 }
 
+const toRadian = (deg) => {
+    return deg * 0.0174533;
+}
 
-function start() {
+const start = () => {
     var canvas = document.getElementById("glcanvas");
     var gl = canvas.getContext("webgl");    // инициализация контекста GL
     
     if (!gl) {
         console.log("webGL doesnt work")
     }
-
-    
 
     var vertexShaderSource = document.getElementById("2d-vertex-shader").text;
     var fragmentShaderSource = document.getElementById("2d-fragment-shader").text;
@@ -100,9 +101,11 @@ function start() {
         2,4,
         2,-4,
         -2,-2];
+
     for(let i = 0;i < 10;i++){
         figure[i] /= 8.0; //normalize
     }
+
     console.log(figure);
     let uniformTranslateMatLocation = gl.getUniformLocation(program,"u_translate");
     let uniformScaleMatLocation = gl.getUniformLocation(program,"u_scale");
@@ -121,6 +124,12 @@ function start() {
     let scaleSlider = document.getElementById("scaleSlider");
     let rotateSlider = document.getElementById("rotateSlider");
     let invertCheckBox = document.getElementById("invertCheckBox");
+
+    //labes
+    let translateLabelX = document.getElementById("translateLabelX");
+    let translateLabelY = document.getElementById("translateLabelY");
+    let rotateLabel = document.getElementById("rotateLabel");
+    let scaleLabel = document.getElementById("scaleLabel");
 
     let inverted = false;
     invertCheckBox.onchange = () => {
@@ -142,7 +151,8 @@ function start() {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.clearColor(0, 0, 0,1);
 
-        gl.uniformMatrix3fv(uniformRotateMatLocation,false,rotate(rotateSlider.value).flat());
+        rotateLabel.innerHTML = `Значение: ${rotateSlider.value} градусов`;
+        gl.uniformMatrix3fv(uniformRotateMatLocation,false,rotate(toRadian(rotateSlider.value)).flat());
         gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.drawElements(gl.LINES , 10, gl.UNSIGNED_SHORT, 0);
@@ -152,7 +162,19 @@ function start() {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.clearColor(0, 0, 0,1);
         
+        scaleLabel.innerHTML = `Значение: ${scaleSlider.value}`;
         gl.uniformMatrix3fv(uniformScaleMatLocation,false,scale(scaleSlider.value,scaleSlider.value).flat());
+        gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.drawElements(gl.LINES , 10, gl.UNSIGNED_SHORT, 0);
+    }
+
+    translateSliderX.oninput = () => {
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clearColor(0, 0, 0,1);
+        
+        translateLabelX.innerHTML = `Значение: ${translateSliderX.value}`;
+        gl.uniformMatrix3fv(uniformTranslateMatLocation,false,translate(translateSliderX.value,translateSliderY.value).flat());
         gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.drawElements(gl.LINES , 10, gl.UNSIGNED_SHORT, 0);
@@ -162,21 +184,14 @@ function start() {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.clearColor(0, 0, 0,1);
         
-        
+        translateLabelY.innerHTML = `Значение: ${translateSliderY.value}`;
         gl.uniformMatrix3fv(uniformTranslateMatLocation,false,translate(translateSliderX.value,translateSliderY.value).flat());
         gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.drawElements(gl.LINES , 10, gl.UNSIGNED_SHORT, 0);
     }
-    translateSliderX.oninput = () => {
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.clearColor(0, 0, 0,1);
-        
-        gl.uniformMatrix3fv(uniformTranslateMatLocation,false,translate(translateSliderX.value,translateSliderY.value).flat());
-        gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.drawElements(gl.LINES , 10, gl.UNSIGNED_SHORT, 0);
-    }
+    
+
         
     
     var vertexBuffer = gl.createBuffer();
@@ -200,9 +215,4 @@ function start() {
     gl.drawElements(gl.LINES , 10, gl.UNSIGNED_SHORT, 0);
     //gl.drawArrays(gl.LINE_LOOP,0,5);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER,null);
-    // очистить буфер цвета и буфер глубины.
-
-
-  
 }

@@ -1,48 +1,49 @@
 <script id="2d-vertex-shader" type="notjs">
- 
-    // атрибут, который будет получать данные из буфера
     attribute vec4 a_position;
     uniform mat3 u_translate;
     uniform mat3 u_scale;
     uniform mat3 u_invert;
     uniform mat3 u_rotate;
-
-
-    // все шейдеры имеют функцию main
     void main() {
-   
-      // gl_Position - специальная переменная вершинного шейдера,
-      // которая отвечает за установку положения
       vec3 pos = vec3(a_position.xy, 1);
-      vec3 resPos = u_rotate*u_scale*u_translate*u_invert*pos;
+      vec3 resPos = u_rotate*u_translate*u_scale*u_invert*pos;
       gl_Position = vec4(resPos.xy, 0,1);
-      //gl_PointSize = 10.0;
     }
-   
   </script>
-   
   <script id="2d-fragment-shader" type="notjs">
-   
-    // фрагментные шейдеры не имеют точности по умолчанию, поэтому нам необходимо её
-    // указать. mediump подойдёт для большинства случаев. Он означает "средняя точность"
     precision mediump float;
-   
     void main() {
-      // gl_FragColor - специальная переменная фрагментного шейдера.
-      // Она отвечает за установку цвета.
       gl_FragColor = vec4(1, 0.5, 1, 1); // вернёт красновато-фиолетовый
     }
    
   </script>
 <body onload="start()">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,400i&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="script.js"></script>
+    <div>
     <canvas id="glcanvas" width="800" height="600">
       Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
     </canvas>
+    </div>
 
-        <input type="range" min="-1" max="1" value="0" step="0.05"  id="translateSliderX">
-        <input type="range" min="-1" max="1" value="0" step="0.05" id="translateSliderY">
-        <input type="range" min="-6.28" max="6.28" value="0" step="0.05" id="rotateSlider">
-        <input type="range" min="-10" max="10" value="0" step="0.1" id="scaleSlider">	
-        <input type="checkbox" id="invertCheckBox">    
+        <div class="sliderBlock">
+            <div class="info"><p class="label">Движение по оси X  </p><p class="val" id="translateLabelX">Значение: 0</p></div>
+            <input type="range" min="-1" max="1" value="0" step="0.05"  id="translateSliderX">
+        </div>
+        <div class="sliderBlock">
+            <div class="info"><p class="label">Движение по оси Y  </p><p class="val" id="translateLabelY">Значение: 0</p></div>
+            <input type="range" min="-1" max="1" value="0" step="0.05" id="translateSliderY">
+        </div>
+        <div class="sliderBlock">
+            <div class="info"><p class="label">Поворот  </p><p class="val" id="rotateLabel">Значение: 0 градусов</p></div>
+            <input type="range" min="-360" max="360" value="0" step="1" id="rotateSlider">
+        </div>
+        <div class="sliderBlock">
+            <div class="info"><p class="label">Масштабирование  </p><p class="val" id="scaleLabel">Значение: 0</p></div>
+        <input type="range" min="0" max="2" value="1" step="0.1" id="scaleSlider">	
+        </div>
+        <div class="sliderBlock">
+            <div class="info"><p class="label">Инвертирование</p><input type="checkbox" id="invertCheckBox"></div>
+        </div>
   </body>
