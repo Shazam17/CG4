@@ -1,13 +1,14 @@
 <script id="2d-vertex-shader" type="notjs">
-    attribute vec4 a_position;
+    attribute vec3 a_position;
     uniform mat3 u_translate;
     uniform mat3 u_scale;
     uniform mat3 u_invert;
     uniform mat3 u_rotate;
+    uniform mat4 u_look;
     void main() {
       vec3 pos = vec3(a_position.xy, 1);
       vec3 resPos = u_rotate*u_translate*u_scale*u_invert*pos;
-      gl_Position = vec4(resPos.xy, 0,1);
+      gl_Position = u_look * vec4(a_position,1);
     }
   </script>
   <script id="2d-fragment-shader" type="notjs">
