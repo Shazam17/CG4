@@ -30,8 +30,7 @@ class vector {
     constructor(arr) {
         this.vect = arr;
     }
-
-
+    
     len() {
         let sum = 0;
         for(let i = 0; i < this.vect.length;i++){
@@ -82,8 +81,8 @@ const crossProduct3 = (v1 , v2) => {
 }
 
 const lookAt3 = (from, to) => {
-    let forward = to.minus(from).norm();
-    let right = crossProduct3(new vector([0,1,0]),forward);
+    let forward = from.minus(to).norm();
+    let right = crossProduct3(new vector([0,1,0]),forward).norm();
     let up = crossProduct3(forward,right);
     
     return [
@@ -91,6 +90,15 @@ const lookAt3 = (from, to) => {
         up.addCoord(0).vect,
         forward.addCoord(0).vect,
         from.addCoord(1).vect
+    ];
+}
+
+const translate3 = (a, b, c) => {
+    return [
+        [1, 0, 0, 1],
+        [0, 1, 0, 1],
+        [0, 0, 1, 1],
+        [a, b, c, 1]
     ];
 }
 
@@ -125,17 +133,17 @@ const start = () => {
     gl.clearColor(0, 0, 0,1);
     
     let figure3d = [
-        -2,4,0, 
-        0,2,0, 
-        2,4,0,
-        2,-4,0,
-        -2,-2,0,
+        -2,4,1, 
+        0,2,1, 
+        2,4,1,
+        2,-4,1,
+        -2,-2,1,
 
-        -2,4,-2, 
-        0,2,-2, 
-        2,4,-2,
-        2,-4,-2,
-        -2,-2,-2
+        -2,4,-1, 
+        0,2,-1, 
+        2,4,-1,
+        2,-4,-1,
+        -2,-2,-1
     ];
 
     const indicies3d = [0,1 , 1,2, 2,3, 3,4, 4,0,
@@ -153,6 +161,8 @@ const start = () => {
     
     let speedSlider = document.getElementById("speedSlider");
     let speedSliderLabel = document.getElementById("speedSliderLabel");
+
+    
     speedSlider.oninput = () => {
         speed = initSpeed* speedSlider.value;
         speedSliderLabel.innerHTML = `Значение: ${speedSlider.value}`;
@@ -167,10 +177,12 @@ const start = () => {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indicies3d),gl.STATIC_DRAW);
 
 
-    var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+    let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
     gl.enableVertexAttribArray(positionAttributeLocation);
     gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
+    let translateUniformLoc = gl.getUniformLocation(program,"u_translate");
+    gl.uniformMatrix4fv(translateUniformLoc,false,translate3(0,0.0001,0).flat());
 
     gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -180,7 +192,9 @@ const start = () => {
         gl.clearColor(0, 0, 0,1);
         let x = radius * Math.sin(performance.now()*speed);
         let y = radius * Math.cos(performance.now()*speed);
-        let mat = lookAt3(new vector([0,0,0]),new vector([x,0,y]));
+        //let mat = lookAt3(new vector([0,0,0]),new vector([x,0,y]));
+        console.log(`position X:${x} Y:${y}`)
+        let mat = lookAt3(new vector([0 ,0,0]),new vector([x,0,y]));
         gl.uniformMatrix4fv(uniformLookMatLocation,false,mat.flat());
         gl.drawElements(gl.LINES , 30, gl.UNSIGNED_SHORT, 0);
     }
